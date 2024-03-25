@@ -69,7 +69,6 @@ export class AuthService {
     private async getRefreshToken(user: User): Promise<Token> {
         const currentDate = new Date()
         const exp = new Date(currentDate.setMonth(currentDate.getMonth() + 1))
-        // console.log(user)
         await this.tokenRepository.delete({
             user: user,
         }).catch((err) => {

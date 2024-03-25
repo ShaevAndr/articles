@@ -1,7 +1,11 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto';
+import { JwtAuthGuard } from '@auth/guards/auth.guard';
+import { Request } from 'express';
 
+
+@UseGuards(JwtAuthGuard)
 @Controller('user')
 export class UserController {
     constructor(private readonly userService: UserService) { }
@@ -12,7 +16,8 @@ export class UserController {
     }
 
     @Get('get_all')
-    async getUsers() {
+    async getUsers(@Req() req: Request) {
+        console.log(req.user)
         return await this.userService.findAll();
     }
 

@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { DataSource } from 'typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { env } from 'process';
+import { ArticlesModule } from './articles/articles.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { env } from 'process';
     }),
     UserModule,
     AuthModule,
+    ArticlesModule,
   ],
 })
 export class AppModule {
