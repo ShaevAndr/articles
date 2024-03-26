@@ -6,17 +6,20 @@ import { UserService } from '@user/user.service';
 import { NewArticleDto } from './dto/create-article.dto';
 import { EditArticleDto } from './dto/edit-article.dto';
 import { FiltersDto, PagesDto } from './dto/filters.dto';
+import { CacheService } from 'src/cache/cache.service';
 
 @Injectable()
 export class ArticlesService {
     private readonly logger = new Logger(ArticlesService.name)
     constructor(
         @InjectRepository(Article) private readonly articlesRepository: Repository<Article>,
-        private readonly userService: UserService
+        private readonly userService: UserService,
+        private readonly cacheService: CacheService,
     ) { }
 
     async create(article: NewArticleDto, userId: string) {
         const user = await this.userService.findOne({ id: userId })
+        await this.cacheService.delete('*')
         return await this.articlesRepository.save(
             {
                 ...article,
@@ -27,17 +30,27 @@ export class ArticlesService {
 
     async delete(articleId: number, userId: string) {
         await this.validateArticleAutor(articleId, userId)
-        return await this.articlesRepository.delete({ id: articleId })
+        const response = await this.articlesRepository.delete({ id: articleId })
+        await this.cacheService.delete('*')
+        return response
     }
 
     async edit(updatedArticle: EditArticleDto, userId) {
         const articleInBase = await this.validateArticleAutor(updatedArticle.id, userId)
         Object.assign(articleInBase, updatedArticle)
-        return await this.articlesRepository.save(articleInBase)
+        const response = await this.articlesRepository.save(articleInBase)
+        await this.cacheService.delete('*')
+        return response
     }
 
     async find(queryParams: FiltersDto): Promise<Article[]> {
+        const cacheKey = JSON.stringify(queryParams);
         const query = await this.articlesRepository.createQueryBuilder('article');
+
+        let articles = await this.cacheService.get(cacheKey);
+        if (articles) {
+            return articles
+        }
 
         if (queryParams.title) {
             query.andWhere('article.title LIKE :title', {
@@ -74,7 +87,9 @@ export class ArticlesService {
             }
         }
 
-        return await query.getMany();
+        const queryResult = await query.getMany();
+        await this.cacheService.set(cacheKey, queryResult, 6000);
+        return queryResult
     }
 
     async getById(articleId: number) {
@@ -92,7 +107,7 @@ export class ArticlesService {
             }
         }
 
-        return await this.articlesRepository.find({})
+        return await await query.getMany();
     }
 
     private async validateArticleAutor(articleId: number, userId: string): Promise<Article> {
