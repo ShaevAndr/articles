@@ -4,12 +4,18 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { DataSource } from 'typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { env } from 'process';
 import { ArticlesModule } from './articles/articles.module';
-import { CacheModule } from './cache/cache.module';
+import { CacheModule } from '@nestjs/cache-manager';
+import * as redisStore from 'cache-manager-redis-store';
 
 @Module({
   imports: [
+    CacheModule.register({
+      isGlobal: true,
+      // store: redisStore,
+      // host: 'localhost',
+      // port: 6379,
+    }),
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'postgres',
@@ -24,7 +30,6 @@ import { CacheModule } from './cache/cache.module';
     UserModule,
     AuthModule,
     ArticlesModule,
-    CacheModule,
   ],
 })
 export class AppModule {

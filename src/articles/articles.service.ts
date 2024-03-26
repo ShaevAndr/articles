@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, Inject, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Article } from './entity/article.entity';
 import { Repository } from 'typeorm';
@@ -6,7 +6,8 @@ import { UserService } from '@user/user.service';
 import { NewArticleDto } from './dto/create-article.dto';
 import { EditArticleDto } from './dto/edit-article.dto';
 import { FiltersDto, PagesDto } from './dto/filters.dto';
-import { CacheService } from 'src/cache/cache.service';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class ArticlesService {
@@ -14,12 +15,12 @@ export class ArticlesService {
     constructor(
         @InjectRepository(Article) private readonly articlesRepository: Repository<Article>,
         private readonly userService: UserService,
-        private readonly cacheService: CacheService,
+        @Inject(CACHE_MANAGER) private cacheService: Cache,
     ) { }
 
     async create(article: NewArticleDto, userId: string) {
         const user = await this.userService.findOne({ id: userId })
-        await this.cacheService.delete('*')
+        await this.cacheService.reset()
         return await this.articlesRepository.save(
             {
                 ...article,
@@ -31,7 +32,7 @@ export class ArticlesService {
     async delete(articleId: number, userId: string) {
         await this.validateArticleAutor(articleId, userId)
         const response = await this.articlesRepository.delete({ id: articleId })
-        await this.cacheService.delete('*')
+        await this.cacheService.reset()
         return response
     }
 
@@ -39,7 +40,7 @@ export class ArticlesService {
         const articleInBase = await this.validateArticleAutor(updatedArticle.id, userId)
         Object.assign(articleInBase, updatedArticle)
         const response = await this.articlesRepository.save(articleInBase)
-        await this.cacheService.delete('*')
+        await this.cacheService.reset()
         return response
     }
 
@@ -47,7 +48,8 @@ export class ArticlesService {
         const cacheKey = JSON.stringify(queryParams);
         const query = await this.articlesRepository.createQueryBuilder('article');
 
-        let articles = await this.cacheService.get(cacheKey);
+        const articles = await this.cacheService.get(cacheKey) as Article[];
+        console.log(articles)
         if (articles) {
             return articles
         }
@@ -88,7 +90,7 @@ export class ArticlesService {
         }
 
         const queryResult = await query.getMany();
-        await this.cacheService.set(cacheKey, queryResult, 6000);
+        await this.cacheService.set(cacheKey, queryResult);
         return queryResult
     }
 

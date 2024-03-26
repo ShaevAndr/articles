@@ -4,10 +4,9 @@ import { ArticlesService } from './articles.service';
 import { UserModule } from '@user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Article } from './entity/article.entity';
-import { CacheModule } from 'src/cache/cache.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Article]), UserModule, CacheModule],
+  imports: [TypeOrmModule.forFeature([Article]), UserModule],
   controllers: [ArticlesController],
   providers: [ArticlesService]
 })
