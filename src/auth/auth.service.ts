@@ -83,7 +83,7 @@ export class AuthService {
     }
 
     async deleteRefreshToken(token: string): Promise<void> {
-        console.log(await this.tokenRepository.delete({ token }))
+        await this.tokenRepository.delete({ token })
     }
 
 }
