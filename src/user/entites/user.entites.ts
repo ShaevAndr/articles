@@ -1,5 +1,6 @@
 import { Token } from '@auth/entites';
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, OneToOne, JoinColumn } from 'typeorm';
+import { Article } from 'src/articles/entity/article.entity';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, OneToOne, JoinColumn, OneToMany } from 'typeorm';
 
 @Entity()
 export class User {
@@ -27,6 +28,9 @@ export class User {
 
     @OneToOne(() => Token, token => token.user)
     token: Token;
+
+    @OneToMany(() => Article, (article) => article.author)
+    article: Article[];
 }
 
 type Roles = 'admin' | 'user';

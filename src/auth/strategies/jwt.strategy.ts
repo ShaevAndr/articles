@@ -19,7 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
     private readonly logger = new Logger(JwtStrategy.name)
 
-    async validate(payload: JwtPayload) {
+    async validate(payload: JwtPayload): Promise<JwtPayload> {
         const user: User = await this.userService.findOne({ id: payload.id }).catch((err) => {
             this.logger.error(err);
             return null;

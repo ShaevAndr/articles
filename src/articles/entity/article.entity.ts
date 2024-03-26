@@ -1,6 +1,6 @@
 
 import { User } from '@user/entites/user.entites';
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, OneToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, OneToOne, ManyToOne, JoinColumn } from 'typeorm';
 
 @Entity()
 export class Article {
@@ -16,7 +16,8 @@ export class Article {
     @CreateDateColumn()
     publishDate: string;
 
-    @OneToOne(() => User, user => user.id)
-    author: string;
+    @ManyToOne(() => User, user => user.article)
+    @JoinColumn()
+    author: User;
 
 }
