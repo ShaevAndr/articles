@@ -2,7 +2,9 @@ import { BadRequestException, Body, Controller, Post, UnauthorizedException } fr
 import { AUTH_ENDPOINTS } from 'src/constants/endpoints';
 import { AuthService } from './auth.service';
 import { LoginDto, RefreshTokenDto, RegistrDto } from './dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AuthTokens } from './types/Tokens';
+import { User } from '@user/entites/user.entites';
 
 @ApiTags('Авторизация')
 @Controller(AUTH_ENDPOINTS.ROOT)
@@ -13,17 +15,17 @@ export class AuthController {
 
     @ApiOperation({ summary: 'Логин' })
     @Post(AUTH_ENDPOINTS.LOGIN)
-    async login(@Body() dto: LoginDto) {
+    async login(@Body() dto: LoginDto):Promise<AuthTokens> {
         const tokens = await this.authServices.login(dto);
         if (!tokens) {
             throw new BadRequestException(`Не получается войти с данными ${JSON.stringify(dto)}`);
         }
-        return { tokens }
+        return tokens 
     }
 
     @ApiOperation({ summary: 'Регистрация' })
     @Post(AUTH_ENDPOINTS.REGISTRATION)
-    async registr(@Body() dto: RegistrDto) {
+    async registr(@Body() dto: RegistrDto):Promise<User> {
         const user = await this.authServices.registr(dto);
         if (!user) {
             throw new BadRequestException(
@@ -35,7 +37,7 @@ export class AuthController {
 
     @ApiOperation({ summary: 'Обновление токена' })
     @Post(AUTH_ENDPOINTS.REFRESH_TOKEN)
-    async refreshTokens(@Body() token: RefreshTokenDto) {
+    async refreshTokens(@Body() token: RefreshTokenDto):Promise<AuthTokens> {
         const tokens = await this.authServices.refreshToken(token.token);
         if (!tokens) {
             throw new UnauthorizedException();

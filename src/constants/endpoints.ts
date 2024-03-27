@@ -3,7 +3,7 @@ export const AUTH_ENDPOINTS = {
     REGISTRATION:'registr',
     LOGIN: 'login',
     LOGOUT: 'logout',
-    REFRESH_TOKEN: 'refresh_token'
+    REFRESH_TOKEN: 'refresh-tokens'
 }
 
 export const ARTICLES_ENDPOINTS = {
