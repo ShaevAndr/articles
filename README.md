@@ -24,7 +24,6 @@
 
 ## Description
 
-Тестовый проект.
 
 ## Installation
 
